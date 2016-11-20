@@ -3,6 +3,7 @@ const execFile = require('child_process').execFile;
 var votingSkip = 0;
 var maxId = 0;
 var voters = {};
+var songIsVoted = {};
 
 const globalMessage = function(msg) {
     console.log("Sending " + msg + " to all the clients");
@@ -92,10 +93,25 @@ exports.onRequest = function(request) {
               connection.sendUTF("You already votedsysmsg");
               console.log("You already voted");
             }
+          } else if (message.utf8Data.indexOf("newsong") > 0) {
+              var songName = message.utf8Data.substr(0, message.utf8Data.indexOf("newsong"));
+              if (!voters[myId][songName]) {
+                voters[myId][songName] = true;
+                songIsVoted[songName]++;
+                console.log(songIsVoted[songName])
+                if (parseFloat(songIsVoted[songName]/global.wsServer.connections.length) > 0.70) {
+                  voters[myId][songName] = false;
+                  songIsVoted[songName] = 0;
+                  changeSong(songName, connection);
+                }
+              }
           } else {
             if (global.wsServer.connections.length == 1) changeSong(message.utf8Data, connection);
             else {
-              globalMessage("newsong")
+              console.log("created votation for new playlist");
+              voters[myId][message.utf8Data] = false;
+              songIsVoted[message.utf8Data] = 0;
+              globalMessage(message.utf8Data+"newsong");
             }
           }
       }
