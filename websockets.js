@@ -24,7 +24,7 @@ var getInfoSongs = function(connection) {
     connection.process.stdout.on('data', function (data) {
       var cleanData = data.substr(data.indexOf("Num"));
       cleanData = cleanData.substr(0, cleanData.indexOf("Showing"));
-      connection.sendUTF(cleanData);
+      globalMessage(cleanData);
       connection.process.kill();
     });
 
@@ -98,7 +98,8 @@ exports.onRequest = function(request) {
               if (!voters[myId][songName]) {
                 voters[myId][songName] = true;
                 songIsVoted[songName]++;
-                console.log(songIsVoted[songName])
+                globalMessage(songIsVoted[songName] + " out of " + global.wsServer.connections.length + " people voted for " + songName);
+                console.log(songIsVoted[songName] + " out of " + global.wsServer.connections.length + " people voted for " + songName);
                 if (parseFloat(songIsVoted[songName]/global.wsServer.connections.length) > 0.70) {
                   voters[myId][songName] = false;
                   songIsVoted[songName] = 0;

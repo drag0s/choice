@@ -71,7 +71,7 @@ Ch<img id='logo' class="img-responsive" src="img/Choice Music Logo.png" alt="" w
                   <span class="name">Start Session!</span>
 
 <div id="sysmsg">
-  1/5 have voted to skip
+
 </div> <br>
     <button  onClick="next()" type="button" class="btn btn-default"style="margin-bottom: 10px; background-color: #efe126">
 <span class="glyphicon glyphicon-step-forward"></span> Vote to SKIP </button>
@@ -94,81 +94,90 @@ Ch<img id='logo' class="img-responsive" src="img/Choice Music Logo.png" alt="" w
 
                   <script>
 
-  // setup websocket with callbacks
+                  // setup websocket with callbacks
 
- var ws = new WebSocket('ws://10.21.209.237:3000/');
-  ws.onopen = function() {
+                 var ws = new WebSocket('ws://10.21.209.237:3000/');
+                  ws.onopen = function() {
 
-    //log('CONNECT');
-    //ws.send('1234')
-  };
+                    //log('CONNECT');
+                    //ws.send('1234')
+                  };
 
-  ws.onclose = function() {
+                  ws.onclose = function() {
 
-  };
+                  };
 
-  var makeUL = function(array) {
-  // Create the list element:
-  var list = document.createElement('ul');
+                  var makeUL = function(array) {
+                  // Create the list element:
+                  var list = document.createElement('ul');
 
-  for(var i = 0; i < array.length; i++) {
-      // Create the list item:
-      var item = document.createElement('li');
+                  for(var i = 0; i < array.length; i++) {
+                      // Create the list item:
+                      var item = document.createElement('li');
 
-      // Set its contents:
-      item.appendChild(document.createTextNode(array[i]));
+                      // Set its contents:
+                      item.appendChild(document.createTextNode(array[i]));
 
-      // Add it to the list:
-      list.appendChild(item);
-  }
+                      // Add it to the list:
+                      list.appendChild(item);
+                  }
 
-  // Finally, return the constructed list:
-  return list;
-}
+                  // Finally, return the constructed list:
+                  return list;
+                }
 
-  var onMsg = function(event) {
-    console.log(event.data);
-    $("#loading").hide();
-    /*var cleanData = event.data.substr(event.data.indexOf("Num"));
-    cleanData = cleanData.substr(0, cleanData.indexOf("Showing"));*/
-    if (event.data.indexOf("sysmsg") > 0) {
-      var message = event.data.substr(0, event.data.indexOf("sysmsg"));
-      $("#sysmsg").empty();
-      $("#sysmsg").append(message);
-    }
-    var newData = event.data.split('\n');
-    newData.shift();
-    newData = newData.splice(0, 7);
-    makeUL(newData);
+                  var onMsg = function(event) {
+                    console.log(event.data);
+                    /*var cleanData = event.data.substr(event.data.indexOf("Num"));
+                    cleanData = cleanData.substr(0, cleanData.indexOf("Showing"));*/
+                    if (event.data.indexOf("sysmsg") > 0) {
+                      var message = event.data.substr(0, event.data.indexOf("sysmsg"));
+                      $("#sysmsg").empty();
+                      $("#sysmsg").append(message);
+                    } else if (event.data.indexOf("newsong") > 0) {
+                      console.log("new song");
+                      var song = event.data.substr(0, event.data.indexOf("newsong"));
+                      if (confirm("Do you want to listen to " + song + " music?") == true) {
+                        ws.send(song+'newsong');
+                      }
+                    } else {
+                      $("#loading").hide();
+                      $("#songList").empty();
+                      var newData = event.data.split('\n');
+                      newData.shift();
+                      newData = newData.splice(0, 7);
+                      makeUL(newData);
 
-    $(document).ready(function(){
-      $(newData).each(function(i, el){
-          var li = document.createElement('li');
-          li.setAttribute('class', 'list-group-item');
-          console.log(el);
-          li.innerHTML = el;
-          $("#songList")[0].appendChild(li);
-      });
-    });
+                      $(document).ready(function(){
+                        $(newData).each(function(i, el){
+                            var li = document.createElement('li');
+                            li.setAttribute('class', 'list-group-item');
+                            console.log(el);
+                            li.innerHTML = el;
+                            $("#songList")[0].appendChild(li);
+                        });
+                      });
+                    }
 
-  }
 
-  ws.onmessage = function(event) {
-    onMsg(event);
-  };
+                  }
 
-  var play = function() {
-    var song = $("#song").val();
-    $('#loading').show();
-    $('#songList').empty();
-    ws.send(song);
-  }
+                  ws.onmessage = function(event) {
+                    onMsg(event);
+                  };
 
-  var next = function() {
-    ws.send('skip');
-  }
+                  var play = function() {
+                    var song = $("#song").val();
+                    $('#loading').show();
+                    $('#songList').empty();
+                    ws.send(song);
+                  }
 
-</script>
+                  var next = function() {
+                    ws.send('skip');
+                  }
+
+                </script>
 
                   <ul id="songList" class="list-group">
                    </ul>
